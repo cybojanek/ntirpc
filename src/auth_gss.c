@@ -183,6 +183,7 @@ authgss_ncreate(CLIENT *clnt, gss_name_t name, struct rpc_gss_sec *sec)
 	gd->clnt = clnt;
 	gd->ctx = GSS_C_NO_CONTEXT;
 	gd->sec = *sec;
+	gd->established = false;
 
 	gd->gc.gc_v = RPCSEC_GSS_VERSION;
 	gd->gc.gc_proc = RPCSEC_GSS_INIT;
