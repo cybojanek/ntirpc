@@ -601,7 +601,15 @@ clnt_req_process_reply(SVCXPRT *xprt, struct svc_req *req)
 
 	_seterr_reply(&req->rq_msg, &(cc->cc_error));
 	if (cc->cc_error.re_status == RPC_SUCCESS) {
-		if (!AUTH_VALIDATE(cc->cc_auth, &(cc->cc_verf))) {
+		// TODO(cybojanek): nicer fix
+		struct opaque_auth *oa = &(cc->cc_verf);
+		if (req->rq_msg.rm_reply.rp_stat == MSG_ACCEPTED && cc->cc_verf.oa_length == 0) {
+			struct opaque_auth *oa2 = &req->rq_msg.ru.RM_rmb.ru.RP_ar.ar_verf;
+			if (oa2->oa_length > 0) {
+				oa = oa2;
+			}
+		}
+		if (!AUTH_VALIDATE(cc->cc_auth, oa)) {
 			cc->cc_error.re_status = RPC_AUTHERROR;
 			cc->cc_error.re_why = AUTH_INVALIDRESP;
 		} else if (cc->cc_reply.proc
